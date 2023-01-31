@@ -1,0 +1,10 @@
+customer,mfg_month,fault_description,total_fault
+Honda,Dec2019,Machine Cutting problem,20
+Tesla,Jun2016,Battery size,29
+Ford,Mar2023,Testing Failed,50
+Honda,Nov2019,Machine Cutting problem,100
+Honda,Mar2019,Break shoe quality issue,37
+Tesla,Jun2018,Volkswagen,39
+Maruthi,Jan2020,Dimension mismatch,15
+Maruthi,Oct2022,Dimension changed ,18
+Volkswagen,Feb2021,Quality issue,35

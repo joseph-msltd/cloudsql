@@ -1,0 +1,104 @@
+name: 'CloudSQL'
+
+on:
+  #This is for manual trigger
+  workflow_dispatch:
+  push:
+    paths:
+      - 'cloudsql/py/**'
+      - 'cloudsql/Dockerfile'
+      - '.github/workflows/cloudsql.yaml'
+    branches:
+      - master
+  pull_request:
+
+env:
+  PROJECT_ID: <project_id>
+  INSTANCE_REGION: us-central1
+  INSTANCE_NAME: bigquery-sql-new
+  REPO: gcprepo
+  DB_PORT: 3306
+  DB_USER: root
+  DB_PASS: 1234
+  DB_NAME: bq-sql
+
+jobs:
+  terraform:
+    name: 'Cloudsql'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: cloudsql/
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+#     This is to authenticate via SA key
+  #      - uses: google-github-actions/setup-gcloud@v0.6.0
+  #        with:
+  #          service_account_key: ${{ secrets.CICD_SECRET }}
+  #          project_id: ${{ secrets.PROJECT_ID }}
+  #          export_default_credentials: true
+
+#     This is to authenticate via Workflow Identity
+      - uses: 'google-github-actions/auth@v1'
+        with:
+          workload_identity_provider: 'projects/<projectnumber>/locations/global/workloadIdentityPools/githubaction/providers/github'
+          service_account: '<service-account>@<project_id>.iam.gserviceaccount.com'
+
+      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
+        working-directory: cloudsql/tf
+        run: |
+          terraform fmt -check
+          terraform init
+          terraform plan
+
+      - name: Terraform Apply
+        working-directory: cloudsql/tf
+        if: github.ref == 'refs/heads/cloudsql' && github.event_name == 'push'
+        run: terraform apply -auto-approve
+
+      # Build the Infrastructure
+      - name: Build and Push
+        run: |-
+          docker build \
+            --tag "$INSTANCE_REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$INSTANCE_NAME:$GITHUB_SHA" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF="$GITHUB_REF" \
+            .
+          gcloud auth configure-docker $INSTANCE_REGION-docker.pkg.dev --quiet
+          docker push "$INSTANCE_REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$INSTANCE_NAME:$GITHUB_SHA"
+
+      # Deploy the image
+      - name: Deploy
+        run: |-
+          export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+          gcloud beta run jobs create bq-sql-run-wf \
+          --quiet \
+          --image "$INSTANCE_REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$INSTANCE_NAME:$GITHUB_SHA" \
+          --tasks 1 \
+          --region $INSTANCE_REGION \
+          --project $PROJECT_ID \
+          --set-env-vars INSTANCE_CONNECTION_NAME=$PROJECT_ID:$INSTANCE_REGION:$INSTANCE_NAME \
+          --set-env-vars DB_USER=$DB_USER \
+          --set-env-vars DB_PASS=$DB_PASS \
+          --set-env-vars DB_NAME=$DB_NAME \
+          --max-retries 2
+
+      - name: Execute
+        run: |-
+          gcloud beta run jobs execute bq-sql-run-wf --region $INSTANCE_REGION --project $PROJECT_ID --quiet
+

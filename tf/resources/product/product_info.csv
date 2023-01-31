@@ -1,0 +1,22 @@
+p_id,type,mfg_month,customer,mfg_unit,unit_version
+1014,BK1,Dec2019,Honda,1,0.14
+1016,BK1,Jun2016,Tesla,1,0.12
+1010,BK2,Mar2023,Ford,1,0.12
+1018,BK2,Apr2020,Bentley,1,0.14
+1003,BK1,Nov2019,Honda,1,0.14
+1005,BK1,Mar2019,Honda,1,0.14
+1007,BK2,Feb2011,Vauxall,1,0.13
+1020,BK3,Mar2025,Benz,1,0.13
+1005,BK3,Jan2018,Rolls Royce,1,0.16
+1011,BK1,Nov2021,Ford,2,0.15
+1019,BK1,Oct2021,Ford,2,0.15
+1004,BK1,Oct2021,Bentley,2,0.12
+1013,BK2,Jul2022,Kia,2,0.17
+1017,BK3,Jul2016,Hyundai,2,0.14
+1008,BK4,Mar2019,Honda,2,0.15
+1001,BK1,Dec2021,Ford,3,0.13
+1006,BK1,Nov2019,Ford,3,0.9
+1009,BK1,Dec2022,Rolls Royce,3,0.16
+1015,BK2,Sep2018,Jeep,3,0.13
+1002,BK2,Aug2022,Hyundai,3,0.11
+1012,BK3,Jun2021,Hyundai,3,0.12

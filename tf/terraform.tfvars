@@ -1,0 +1,8 @@
+project_id    = "<project_id>"
+region        = "us-central1"
+instance_name = "bigquery-sql-new"
+database_name = "bq-sql"
+user          = "root"
+pwd           = "1234"
+dataset_name  = "Manufacturernew"
+bucket_name   = "wegcpsqlresources"

@@ -1,0 +1,5 @@
+google-cloud-core==2.3.2
+google-cloud-bigquery==3.4.1
+PyMySQL
+sqlalchemy
+cloud-sql-python-connector==1.0.0

@@ -1,0 +1,42 @@
+README:
+
+Title:
+------
+Data from a Bigquery table is to be read using an sql and results updated in CouldSQL(Mysql) database.
+(This is useful for everyday batch data migration in cloudsql)
+
+Steps:
+------
+1. There are 2 datasets called Product info and fault detection, matching columns are manufacturer-month, customer and fault-description.
+2. Join the fault detection with the product info and retrieve the faulty product details.
+3. Group the result(using customer, type, mfg_unit, unit_version, fault_description) and find the total fault on every category.
+4. Take the top 3 results everyday and store data historically in mysql database
+
+techincal steps:
+1. Use Bigquery external table, hence everyday data ingestion in the storage reflects in bigquery table seemlessly.
+2. Create the application as docker container, push the image in container registry.
+3. Run the application as job in cloud run configured as batch everyday.
+4. Terraform the steps and create CI/CD
+
+Expected Output:
+----------------
+Top 3 faulty categorical products are historically loaded in the cloudsql database.
+
+Resources:
+----------
+-Create a bucket called wegcpsqlresources
+1. gcloud storage buckets create gs://wegcpsqlresources  --default-storage-class=Standard --location=us-central1 --uniform-bucket-level-access
+copy the folders from resources in to the bucket.
+
+2. Create a BQ Dataset:
+bq --location=us-central1 mk --dataset manufacturer
+
+3. Create BQ external tables using the sample files:
+bq mkdef --autodetect --source_format=source_format "bucket_uri" > /tmp/file_name
+
+
+Improvements:
+-------------
+1.Prepare visual dashboard showing last 15 days top faulty products
+2.Partition the table for optimised query results
+3.Check for data quality using cloud functions and process only the correct files or correct rows in files.
